@@ -39,7 +39,7 @@ public class CustomerDAO {
 		cfg.configure("hibernate.cfg.xml");
 		SessionFactory factory=cfg.buildSessionFactory();
 		Session session=factory.openSession();
-		Query query=session.createQuery("from Customer");
+		Query query=session.createQuery("from Customer");	//Entity Class Name
 		ArrayList<Customer> allCustomer=(ArrayList<Customer>)query.getResultList();
 		
 		for(int i=0;i<allCustomer.size();i++) {
@@ -73,11 +73,46 @@ public class CustomerDAO {
 			e.printStackTrace();
 		}
 	}
+	
+	public static void customerCount(String state) {
+		Configuration cfg=new Configuration();
+		cfg.configure("hibernate.cfg.xml");
+		SessionFactory factory=cfg.buildSessionFactory();
+		Session session=factory.openSession();
+	   //Query query=session.createQuery("select count(*) from Customer c where c.state='"+state+"'");//Customer -> Entity name
+		Query query=session.createQuery("select count(*) from Customer c where c.state=?1");//positional parameter
+		query.setParameter(1, state);
+		Object count=query.getSingleResult();
+		System.out.println(count);
+	}
+	
+	public static void deleteCustomer(int customerId) {
+		try {
+		Configuration cfg=new Configuration();
+		cfg.configure("hibernate.cfg.xml");
+		SessionFactory factory=cfg.buildSessionFactory();
+		Session session=factory.openSession();
+		Transaction tx=session.beginTransaction();
+		//Query query=session.createQuery("delete from Customer c where c.customerId="+customerId);
+		Query query=session.createQuery("delete from Customer c where c.customerId=?1");
+		query.setParameter(1, customerId);
+		int success=query.executeUpdate();
+		if(success>=1)System.out.println("Successfully Deleted...");
+		else System.out.println("Record Deletion Failed...");
+		tx.commit();
+		session.close();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		}
 	public static void main(String[] args) 
 	{
 		customerUpdate("Majestic",1001);
 		selectAll();
 		selectCustomerByState("TamilNadu");
+		customerCount("TamilNadu");
+		deleteCustomer(1001);
 	}
 
 }
